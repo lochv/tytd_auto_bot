@@ -506,6 +506,8 @@ Gõ `/start` trong bot để xem menu lệnh đầy đủ. Bộ thường gặp:
 | `/info` | Xem trạng thái tài khoản |
 | `/start_chuot`, `/start_maohiem`, `/start_taydu` … | Bật các auto (chuột chạy, mạo hiểm, Tây Du…) |
 | `/bacminh_map`, `/diich_map`, `/bonglai_map` … | Mở map tương ứng (Mini App) |
+| `/thienma_map` | Mở bản đồ Thiên Ma Cổ Vực |
+| `/thienma_info` | Xem trạng thái quân, máu và Linh Lực của các event user Thiên Ma |
 
 **Admin**
 
