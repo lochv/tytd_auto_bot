@@ -68,41 +68,24 @@ func (p *EventPlayer) giPeakConditionSweep(ev *giEvent) {
 		return
 	}
 
-	seenTypes := make(map[int32]bool)
-	seenCross := make(map[int32]bool)
+	seenCross := map[int32]bool{}
 	for _, cfg := range cfgs {
-		if cfg == nil {
+		if cfg == nil || (cfg.GetType() != 84 && cfg.GetConditionId() < 20000) {
 			continue
 		}
+		conditionID := cfg.GetConditionId()
+		if conditionID <= 0 || seenCross[conditionID] {
+			continue
+		}
+		seenCross[conditionID] = true
 		actID := cfg.GetActivityId()
 		if actID == 0 {
 			actID = activityID
 		}
-		conditionID := cfg.GetConditionId()
-		if conditionID <= 0 {
-			continue
-		}
-		if cfg.GetType() == 84 || conditionID >= 20000 {
-			if seenCross[conditionID] {
-				continue
-			}
-			seenCross[conditionID] = true
-			p.giSend(ev, ACTIVITY_CROSS_RECHARGE_CMD, SERVER_ACTIVITY_CROSS_RECHARGE,
-				&proto.ReceiveCrossUnionRechargeRewardReq{
-					ActivityId: pb.Int32(actID),
-					ConditionId: pb.Int32(conditionID),
-				})
-			continue
-		}
-		typ := cfg.GetType()
-		if typ <= 0 || seenTypes[typ] {
-			continue
-		}
-		seenTypes[typ] = true
-		p.giSend(ev, ACTIVITY_TOKEN_REWARD_CMD, SERVER_ACTIVITY_TOKEN_REWARD,
-			&proto.ReqGetActivityConditionReward{
+		p.giSend(ev, ACTIVITY_CROSS_RECHARGE_CMD, SERVER_ACTIVITY_CROSS_RECHARGE,
+			&proto.ReceiveCrossUnionRechargeRewardReq{
 				ActivityId: pb.Int32(actID),
-				ConditionId: pb.Int32(typ),
+				ConditionId: pb.Int32(conditionID),
 			})
 	}
 }
@@ -120,5 +103,5 @@ func (p *EventPlayer) giHandleConditionReward(ev *giEvent, data []byte) {
 	}
 	log.Printf("[%s] [GodIsland/%s] nhận thưởng mốc nhiệm vụ bang/sự kiện: %s",
 		p.Username, ev.Name, resp.GetRewards())
-	p.sendNotify(fmt.Sprintf("🏝️ [%s] nhận thưởng mốc nhiệm vụ: %s", ev.Name, resp.GetRewards()))
+	p.forceNotify(fmt.Sprintf("🏝️ [%s] nhận thưởng mốc nạp bang: %s", ev.Name, resp.GetRewards()))
 }
