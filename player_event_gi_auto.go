@@ -44,29 +44,18 @@ func (p *EventPlayer) giPeakAutoFeedBall(ev *giEvent) {
 func (p *EventPlayer) giPeakConditionSweep(ev *giEvent) {
 	now := time.Now()
 	p.GodIslandMu.Lock()
-	if ev == nil || ev.ActivityID == 0 || now.Sub(ev.CondSweepLast) < giPeakCondSweepGap {
+	if ev == nil || ev.ActivityID == 0 {
 		p.GodIslandMu.Unlock()
 		return
 	}
-	activityID := ev.ActivityID
 	cfgs := append([]*proto.ActivityConditionConfig(nil), ev.CondCfgs...)
+	if len(cfgs) == 0 || now.Sub(ev.CondSweepLast) < giPeakCondSweepGap {
+		p.GodIslandMu.Unlock()
+		return // the existing garden/shop 21003 pull will populate CondCfgs
+	}
+	activityID := ev.ActivityID
 	ev.CondSweepLast = now
-	needConfig := len(cfgs) == 0 || now.Sub(ev.CondConfigLast) >= giPeakCondSweepGap
-	if needConfig {
-		ev.CondConfigLast = now
-	}
 	p.GodIslandMu.Unlock()
-
-	if needConfig {
-		p.giSend(ev, ACTIVITY_GET_DATA_CMD, SERVER_ACTIVITY_DETAIL,
-			&proto.ReqGetActivityDetail{ActivityId: activityID})
-		if len(cfgs) == 0 {
-			return
-		}
-	}
-	if len(cfgs) == 0 {
-		return
-	}
 
 	seenCross := map[int32]bool{}
 	for _, cfg := range cfgs {
