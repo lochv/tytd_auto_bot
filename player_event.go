@@ -568,7 +568,7 @@ func (p *EventPlayer) eventWsHandler() {
 				p.swMergeConfig(realData)
 				p.swHandleFrameEP(SERVER_ACTIVITY_DETAIL, realData)
 				p.bgActivityDetail(realData, func() {
-					p.giRoute(SERVER_ACTIVITY_DETAIL, realData, (*EventPlayer).giHandleActivityDetail)
+					p.giDeliverActivityDetail(realData)
 				})
 			case SERVER_GOD_ISLAND_PLANT_INFO:
 				p.giRoute(SERVER_GOD_ISLAND_PLANT_INFO, realData, (*EventPlayer).giHandlePlantInfo)
