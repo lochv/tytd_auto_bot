@@ -509,6 +509,9 @@ Gõ `/start` trong bot để xem menu lệnh đầy đủ. Bộ thường gặp:
 | `/thienma_map` | Mở bản đồ Thiên Ma Cổ Vực |
 | `/thienma_info` | Xem trạng thái quân, máu và Linh Lực của các event user Thiên Ma |
 
+**Thiên Ma Cổ Vực:** bot đồng bộ bảng Linh Lực định kỳ; khi dữ liệu xác nhận cầu đã cạn, bot gửi yêu cầu bồi dưỡng đúng 1 quả, tối đa một lần mỗi 30 giây. Các mốc nạp bang chỉ được thử nhận khi cấu hình hoạt động trả về dòng type 84 / conditionId 2xxxx; server quyết định phần thưởng có sẵn hay không. Không tự mua gói bằng tiền thật.
+
+
 **Admin**
 
 | Lệnh | Tác dụng |
