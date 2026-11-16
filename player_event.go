@@ -1504,6 +1504,11 @@ func (p *EventPlayer) giHandleActivityDetail(ev *giEvent, data []byte) {
 	}
 	conditionRows := resp.GetActivity().GetDetailConfig().GetCommonConfig().GetConditionConfig()
 	if len(conditionRows) > 0 {
+		if len(ev.CondCfgs) == 0 {
+			// The first detail response arms an immediate claim pass on the
+			// next resource tick instead of waiting a full 10-minute interval.
+			ev.CondSweepLast = time.Time{}
+		}
 		ev.CondCfgs = append([]*proto.ActivityConditionConfig(nil), conditionRows...)
 	}
 	p.GodIslandMu.Unlock()
