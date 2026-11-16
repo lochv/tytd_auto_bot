@@ -90,6 +90,27 @@ func (p *EventPlayer) giPeakConditionSweep(ev *giEvent) {
 	}
 }
 
+// giDeliverConditionReward takes only an explicitly queued GI response.
+// Unlike giRoute's legacy single-open fallback, this is strict because the
+// same transport types are also used by RebornTrial and SeaWar.
+func (p *EventPlayer) giDeliverConditionReward(respType string, data []byte) bool {
+	p.GodIslandMu.Lock()
+	queue := p.giPending[respType]
+	if len(queue) == 0 {
+		p.GodIslandMu.Unlock()
+		return false
+	}
+	ev := queue[0]
+	if len(queue) == 1 {
+		delete(p.giPending, respType)
+	} else {
+		p.giPending[respType] = queue[1:]
+	}
+	p.GodIslandMu.Unlock()
+	p.giHandleConditionReward(ev, data)
+	return true
+}
+
 // giHandleConditionReward logs only successful non-empty claims. Empty
 // rewards and ret!=0 are routine when a milestone is not ready yet.
 func (p *EventPlayer) giHandleConditionReward(ev *giEvent, data []byte) {
