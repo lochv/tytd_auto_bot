@@ -90,6 +90,27 @@ func (p *EventPlayer) giPeakConditionSweep(ev *giEvent) {
 	}
 }
 
+// giDeliverActivityDetail attributes 21003 only to a request issued by
+// the God Island engine. This transport is shared with other event engines,
+// so the single-open-event fallback is not safe for this response type.
+func (p *EventPlayer) giDeliverActivityDetail(data []byte) bool {
+	p.GodIslandMu.Lock()
+	queue := p.giPending[SERVER_ACTIVITY_DETAIL]
+	if len(queue) == 0 {
+		p.GodIslandMu.Unlock()
+		return false
+	}
+	ev := queue[0]
+	if len(queue) == 1 {
+		delete(p.giPending, SERVER_ACTIVITY_DETAIL)
+	} else {
+		p.giPending[SERVER_ACTIVITY_DETAIL] = queue[1:]
+	}
+	p.GodIslandMu.Unlock()
+	p.giHandleActivityDetail(ev, data)
+	return true
+}
+
 // giDeliverConditionReward takes only an explicitly queued GI response.
 // Unlike giRoute's legacy single-open fallback, this is strict because the
 // same transport types are also used by RebornTrial and SeaWar.
