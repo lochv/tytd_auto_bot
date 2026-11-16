@@ -38,9 +38,9 @@ func (p *EventPlayer) giPeakAutoFeedBall(ev *giEvent) {
 }
 
 // giPeakConditionSweep uses only the condition rows returned by this
-// activity's own 21003 detail. The server decides which rewards are ready.
-// Ordinary rows are grouped by type (21033); cross-union recharge rows are
-// claimed individually (21045), matching the existing RebornTrial engine.
+// activity's own 21003 detail. Only guild-recharge rows (type 84 or
+// conditionId 2xxxx) are eligible; the server decides which rewards are ready.
+// Each row is claimed through 21045, matching the SeaWar/RebornTrial engines.
 func (p *EventPlayer) giPeakConditionSweep(ev *giEvent) {
 	now := time.Now()
 	p.GodIslandMu.Lock()
