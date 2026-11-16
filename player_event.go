@@ -549,6 +549,10 @@ func (p *EventPlayer) eventWsHandler() {
 				p.giRoute(SERVER_GOD_ISLAND_USE_BALL, realData, (*EventPlayer).giHandleUseBallResp)
 			case SERVER_GOD_ISLAND_ACCELERATE:
 				p.giRoute(SERVER_GOD_ISLAND_ACCELERATE, realData, (*EventPlayer).giHandleAccelerateResp)
+			case SERVER_ACTIVITY_TOKEN_REWARD:
+				p.giRoute(SERVER_ACTIVITY_TOKEN_REWARD, realData, (*EventPlayer).giHandleConditionReward)
+			case SERVER_ACTIVITY_CROSS_RECHARGE:
+				p.giRoute(SERVER_ACTIVITY_CROSS_RECHARGE, realData, (*EventPlayer).giHandleConditionReward)
 			case SERVER_ACTIVITY_DETAIL:
 				// Every 21003 answer (event pulls and the hourly activity
 				// poll alike) re-carries its mainConfig — fold it into the
@@ -1163,6 +1167,15 @@ func (p *EventPlayer) godIslandStay() {
 			// sips + fruit — every tick, self-throttled inside.
 			p.giDefHome(which)
 
+			// Thiên Ma resource panel syncs more frequently than the
+			// residency heartbeat. Its response refreshes the Linh Lực cache.
+			if which == GIEventPeak && tick%giPeakBallInfoTicks == 0 {
+				p.giSend(ev, GOD_ISLAND_BALL_INFO_CMD, SERVER_GOD_ISLAND_BALL_INFO,
+					&proto.GodIslandGameSpiritualBallInfoReqMsg{ActivityId: activityID})
+				p.giPeakAutoFeedBall(ev)
+				p.giPeakConditionSweep(ev)
+			}
+
 			if tick%giHeartBeatTicks == 0 {
 				p.giSend(ev, GOD_ISLAND_BASE_INFO_CMD, "",
 					&proto.GodIslandBaseInfoReqMsg{ActivityId: activityID})
@@ -1483,6 +1496,10 @@ func (p *EventPlayer) giHandleActivityDetail(ev *giEvent, data []byte) {
 	if len(mallRows) > 0 {
 		ev.MallRows = mallRows
 		ev.MallBought = bought
+	}
+	conditionRows := resp.GetActivity().GetDetailConfig().GetCommonConfig().GetConditionConfig()
+	if len(conditionRows) > 0 {
+		ev.CondCfgs = append([]*proto.ActivityConditionConfig(nil), conditionRows...)
 	}
 	p.GodIslandMu.Unlock()
 	if changed {
