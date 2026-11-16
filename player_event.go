@@ -1396,9 +1396,13 @@ func (p *EventPlayer) giHandleUseFruitResp(ev *giEvent, data []byte) {
 		return
 	}
 	if resp.GetRet() != 0 {
+		log.Printf("[%s] [GodIsland/%s] bồi dưỡng Linh Lực bị từ chối: ret=%d",
+			p.Username, ev.Name, resp.GetRet())
 		return
 	}
 	p.giCacheBallPower(ev, resp.BallCurPower, resp.BallMaxPower)
+	log.Printf("[%s] [GodIsland/%s] bồi dưỡng Linh Lực thành công, cầu hiện tại=%s",
+		p.Username, ev.Name, resp.GetBallCurPower())
 }
 
 // giHandleUseBallResp reconciles both sides of a heal from
