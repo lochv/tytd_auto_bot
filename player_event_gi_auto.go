@@ -33,7 +33,7 @@ func (p *EventPlayer) giPeakAutoFeedBall(ev *giEvent) {
 
 	p.giSend(ev, GOD_ISLAND_USE_FRUIT_CMD, SERVER_GOD_ISLAND_USE_FRUIT,
 		&proto.GodIslandUseFruitReq{ActivityId: activityID, UseCount: 1})
-	log.Printf("[%s] [GodIsland/%s] tự bồi dưỡng Linh Lực: dùng 1 quả vì cầu đã cạn",
+	log.Printf("[%s] [GodIsland/%s] gửi yêu cầu tự bồi dưỡng Linh Lực: 1 quả (cầu đã cạn)",
 		p.Username, ev.Name)
 }
 
