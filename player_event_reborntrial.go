@@ -38,6 +38,10 @@ var errRbtBusy = errors.New("rbt: request already in flight")
 // rbtRT is the EventPlayer seat transport (bmRoundTrip idiom, generic over
 // answer type — one seat per answer hex, the loop is the only caller).
 func (p *EventPlayer) rbtRT(cmd, wantType string, body []byte) ([]byte, error) {
+	if wantType == SERVER_ACTIVITY_CROSS_RECHARGE {
+		p.ActivityRewardMu.Lock()
+		defer p.ActivityRewardMu.Unlock()
+	}
 	p.RbtMu.Lock()
 	if p.rbtChans == nil {
 		p.rbtChans = map[string]chan []byte{}
