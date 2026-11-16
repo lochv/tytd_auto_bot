@@ -92,17 +92,34 @@ func (p *EventPlayer) giPeakConditionSweep(ev *giEvent) {
 // the God Island engine. This transport is shared with other event engines,
 // so the single-open-event fallback is not safe for this response type.
 func (p *EventPlayer) giDeliverActivityDetail(data []byte) bool {
-	p.GodIslandMu.Lock()
-	queue := p.giPending[SERVER_ACTIVITY_DETAIL]
-	if len(queue) == 0 {
-		p.GodIslandMu.Unlock()
+	var resp proto.RspGetActivityDetail
+	if pb.Unmarshal(data, &resp) != nil {
 		return false
 	}
-	ev := queue[0]
-	if len(queue) == 1 {
+	activityID := resp.GetActivity().GetActivityId()
+	if activityID == 0 {
+		return false
+	}
+
+	p.GodIslandMu.Lock()
+	queue := p.giPending[SERVER_ACTIVITY_DETAIL]
+	index := -1
+	for i, ev := range queue {
+		if ev != nil && ev.ActivityID == activityID {
+			index = i
+			break
+		}
+	}
+	if index < 0 {
+		p.GodIslandMu.Unlock()
+		return false // a 21003 response belonging to another event engine
+	}
+	ev := queue[index]
+	queue = append(queue[:index], queue[index+1:]...)
+	if len(queue) == 0 {
 		delete(p.giPending, SERVER_ACTIVITY_DETAIL)
 	} else {
-		p.giPending[SERVER_ACTIVITY_DETAIL] = queue[1:]
+		p.giPending[SERVER_ACTIVITY_DETAIL] = queue
 	}
 	p.GodIslandMu.Unlock()
 	p.giHandleActivityDetail(ev, data)
