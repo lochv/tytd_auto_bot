@@ -524,6 +524,7 @@ func (t *TeleBot) Run() {
 	b.RegisterHandler(bot.HandlerTypeMessageText, "/ditich_map", bot.MatchTypeExact, t.ballGVGMapHandler)
 	b.RegisterHandler(bot.HandlerTypeMessageText, "/bonglai_map", bot.MatchTypeExact, t.bonglaiMapHandler)
 	b.RegisterHandler(bot.HandlerTypeMessageText, "/thienma_map", bot.MatchTypeExact, t.thienmaMapHandler)
+	b.RegisterHandler(bot.HandlerTypeMessageText, "/thienma_info", bot.MatchTypeExact, t.ThienmaInfoHandler)
 	b.RegisterHandler(bot.HandlerTypeMessageText, "/cuuu_map", bot.MatchTypeExact, t.cuuuMapHandler)
 	b.RegisterHandler(bot.HandlerTypeMessageText, "/kunlun_map", bot.MatchTypeExact, t.kunlunMapHandler)
 	b.RegisterHandler(bot.HandlerTypeMessageText, "/kunlun_info", bot.MatchTypeExact, t.kunlunInfoHandler)
