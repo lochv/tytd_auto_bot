@@ -797,6 +797,11 @@ func (p *Player) wsKeepAlive() {
 }
 
 func (p *Player) wsHandler() {
+	// Optional protocol discovery for messages that do not yet have a handler.
+	// Keep one sample per message type per session and cap the payload preview:
+	// this is enough to identify candidate inventory pushes without dumping
+	// full player data into the logs.
+	unknownLogged := make(map[string]bool)
 	for {
 		select {
 		case <-p.ctx.Done():
@@ -1364,6 +1369,19 @@ func (p *Player) wsHandler() {
 				}()
 			case SERVER_BANG_NHANQUA_SOINOI:
 				go p.unionDailyHandleClaim(realData)
+			default:
+				// Enable with TYTD_DEBUG_UNKNOWNMSG=1. This deliberately
+				// excludes known message types (they are handled above) and
+				// logs only the first short sample for each unknown type.
+				if os.Getenv("TYTD_DEBUG_UNKNOWNMSG") != "" && !unknownLogged[msgType] {
+					unknownLogged[msgType] = true
+					preview := realData
+					if len(preview) > 48 {
+						preview = preview[:48]
+					}
+					log.Printf("[%s] [unknown-msg] type=%s payload_len=%d preview_hex=%x",
+						p.Username, msgType, len(realData), preview)
+				}
 			}
 		}
 	}
