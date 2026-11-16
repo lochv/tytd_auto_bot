@@ -549,10 +549,6 @@ func (p *EventPlayer) eventWsHandler() {
 				p.giRoute(SERVER_GOD_ISLAND_USE_BALL, realData, (*EventPlayer).giHandleUseBallResp)
 			case SERVER_GOD_ISLAND_ACCELERATE:
 				p.giRoute(SERVER_GOD_ISLAND_ACCELERATE, realData, (*EventPlayer).giHandleAccelerateResp)
-			case SERVER_ACTIVITY_TOKEN_REWARD:
-				p.giRoute(SERVER_ACTIVITY_TOKEN_REWARD, realData, (*EventPlayer).giHandleConditionReward)
-			case SERVER_ACTIVITY_CROSS_RECHARGE:
-				p.giRoute(SERVER_ACTIVITY_CROSS_RECHARGE, realData, (*EventPlayer).giHandleConditionReward)
 			case SERVER_ACTIVITY_DETAIL:
 				// Every 21003 answer (event pulls and the hourly activity
 				// poll alike) re-carries its mainConfig — fold it into the
@@ -759,7 +755,12 @@ func (p *EventPlayer) eventWsHandler() {
 				SERVER_RBT_BATTLE_UNIONPLAYER, SERVER_RBT_BATTLE_NOTIC, SERVER_RBT_USE_ITEM,
 				SERVER_RBT_SEND_BONUS_ITEM,
 				SERVER_ACTIVITY_COND_REWARD, SERVER_ACTIVITY_COND_REWARD_ARR, SERVER_ACTIVITY_RANK_REWARD, SERVER_ACTIVITY_CROSS_RECHARGE, SERVER_ACTIVITY_TOKEN_REWARD:
+				// These generic activity answers are shared by GI, RebornTrial
+				// and SeaWar. GI consumes only responses for which it has an
+				// explicit pending request; the other engines keep their own seats.
+				p.giDeliverConditionReward(msgType, realData)
 				p.rbtHandleFrameEP(msgType, realData)
+				p.swHandleFrameEP(msgType, realData)
 			// Thương Minh Yêu Vực: every 349 answer rides the swRT seats
 			// (auto loop + the sanctioned web war order are the callers).
 			case SERVER_SW_ENTER, SERVER_SW_ENTER_GAME, SERVER_SW_EXPLORE,
