@@ -94,6 +94,10 @@ type EventPlayer struct {
 	RbtMu    sync.Mutex
 	rbtChans map[string]chan []byte
 
+	// Serializes the shared 21045 guild-recharge response across RebornTrial,
+	// SeaWar and Thiên Ma. These answers carry no activityId/request token.
+	ActivityRewardMu sync.Mutex
+
 	// Thương Minh Yêu Vực (CelestialSeaWar 349) — event-account clone of
 	// the Player engine (player_event_seawar.go), sharing the swPlayTick
 	// core. NO DB opt-in: Run() starts the loop the moment the account is
