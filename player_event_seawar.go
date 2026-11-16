@@ -36,6 +36,10 @@ var errSwBusy = errors.New("seawar: request already in flight")
 // swRT is the EventPlayer seat transport (rbtRT idiom — one seat per answer
 // hex; the loop goroutine is the only caller).
 func (p *EventPlayer) swRT(cmd, wantType string, body []byte) ([]byte, error) {
+	if wantType == SERVER_ACTIVITY_CROSS_RECHARGE {
+		p.ActivityRewardMu.Lock()
+		defer p.ActivityRewardMu.Unlock()
+	}
 	p.SwMu.Lock()
 	if p.swChans == nil {
 		p.swChans = map[string]chan []byte{}
