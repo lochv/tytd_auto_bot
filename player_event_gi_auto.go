@@ -82,11 +82,20 @@ func (p *EventPlayer) giPeakConditionSweep(ev *giEvent) {
 		if actID == 0 {
 			actID = activityID
 		}
-		p.giSend(ev, ACTIVITY_CROSS_RECHARGE_CMD, SERVER_ACTIVITY_CROSS_RECHARGE,
-			&proto.ReceiveCrossUnionRechargeRewardReq{
-				ActivityId: pb.Int32(actID),
-				ConditionId: pb.Int32(conditionID),
-			})
+		body, err := pb.Marshal(&proto.ReceiveCrossUnionRechargeRewardReq{
+			ActivityId: pb.Int32(actID),
+			ConditionId: pb.Int32(conditionID),
+		})
+		if err != nil {
+			continue
+		}
+		data, err := p.rbtRT(ACTIVITY_CROSS_RECHARGE_CMD, SERVER_ACTIVITY_CROSS_RECHARGE, body)
+		if err != nil {
+			log.Printf("[%s] [GodIsland/%s] claim guild milestone %d failed: %v",
+				p.Username, ev.Name, conditionID, err)
+			continue
+		}
+		p.giHandleConditionReward(ev, data)
 	}
 }
 
@@ -108,27 +117,6 @@ func (p *EventPlayer) giDeliverActivityDetail(data []byte) bool {
 	}
 	p.GodIslandMu.Unlock()
 	p.giHandleActivityDetail(ev, data)
-	return true
-}
-
-// giDeliverConditionReward takes only an explicitly queued GI response.
-// Unlike giRoute's legacy single-open fallback, this is strict because the
-// same transport types are also used by RebornTrial and SeaWar.
-func (p *EventPlayer) giDeliverConditionReward(respType string, data []byte) bool {
-	p.GodIslandMu.Lock()
-	queue := p.giPending[respType]
-	if len(queue) == 0 {
-		p.GodIslandMu.Unlock()
-		return false
-	}
-	ev := queue[0]
-	if len(queue) == 1 {
-		delete(p.giPending, respType)
-	} else {
-		p.giPending[respType] = queue[1:]
-	}
-	p.GodIslandMu.Unlock()
-	p.giHandleConditionReward(ev, data)
 	return true
 }
 
