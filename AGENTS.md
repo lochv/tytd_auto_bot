@@ -1,4 +1,4 @@
-# AGENTS.md — how to add a new event to this bot
+# AGENTS.md — hướng dẫn thêm sự kiện mới vào bot
 
 Playbook distilled from shipping Côn Lôn (type 199) and its parallel port Đỉnh Bắc
 Minh (type 332). When the user asks for "handler for event X", work through these
@@ -6,7 +6,7 @@ phases in order. Do not skip the discovery phase even if the event "looks like" 
 existing one — two events sharing an engine can still differ in grid, items, and
 cost rules, and guessing here is what burns whole sessions later.
 
-## 0. Ground rules (violating these = rework)
+## 0. Quy tắc nền tảng (vi phạm sẽ phải làm lại)
 - **WELFARE PARITY LAW (owner 2026-11-13: "event nào cũng phải auto phát/nhận
   cây, nhận thưởng bang, mua gói…")** — EVERY event auto-engine ships with the
   same welfare baseline; a new engine that only plays the map is INCOMPLETE.
@@ -58,7 +58,7 @@ cost rules, and guessing here is what burns whole sessions later.
 - Report to the user in **Vietnamese**, honestly (502 without pullers is a PASS
   for wiring, say so).
 
-## 1. Discovery (before writing any Go)
+## 1. Khảo sát (trước khi viết Go)
 1. **activityType**: log in the test acc via debugweb/tests, decode a live
    `PushActivityList`, find the row's `type`. Keep a `const activityTypeX = NNN`.
 2. **Opcodes**: if the event ships in the same remote bundle as an existing one,
@@ -86,7 +86,7 @@ cost rules, and guessing here is what burns whole sessions later.
 7. Live-capture anything ambiguous (user can paste packets; decode varints with
    python before trusting them; byte-pin captures in tests).
 
-## 2. Transport invariants (the part that bites)
+## 2. Bất biến truyền tải (phần dễ gây lỗi)
 - Two events answering on the SAME hexes ⇒ one account can seat ONE such scene at
   a time. Mirror the **warKind pattern**: a `warKind`/`warKindEP` flag on
   Player/EventPlayer that MUST flip **before the request write** (inside the
@@ -105,7 +105,7 @@ cost rules, and guessing here is what burns whole sessions later.
   EventPlayer session too (a kunlun card stayed invisible for a day because
   `onlineKu` looked only at *Player fleets).
 
-## 3. State layers (copy → rename → re-verify, never "generalize the gate")
+## 3. Các lớp trạng thái (sao chép → đổi tên → xác minh lại)
 - Leader: `player_<ev>.go` (state struct + seats per response msgType + RoundTrip
   + fold handlers + Status). Init every map field in the constructor (nil-map
   panics have happened).
@@ -120,7 +120,7 @@ cost rules, and guessing here is what burns whole sessions later.
   merge per-account ledgers with newest-departure-wins and prune expired rows,
   or the page shows ghost marches forever.
 
-## 4. Renderer (gimap) — parameterize, do not fork
+## 4. Bộ kết xuất (gimap) — tham số hóa, không fork
 - Bundle all mutable compositor state into a pack struct (`kuSheetPack` pattern:
   sheet/manifest/bg + once/mutexes/caches/scratch), pass pack+layout pointers into
   `renderWar/warFrame/warStatic/buildWarScene`. The second board = a second pack.
@@ -133,7 +133,7 @@ cost rules, and guessing here is what burns whole sessions later.
   Go and writes a PNG you Read (inspect visually) + numeric geometry pins. This
   is how north geometry passed first try on the phone.
 
-## 4b. Map art pipeline — "xịn" means the game's OWN pixels, not yours
+## 4b. Quy trình đồ họa bản đồ — dùng pixel GỐC của game
 The map looks right ONLY when it is drawn from the client's own assets with the
 client's own geometry rules. Never hand-draw tiles, never invent palettes.
 1. **Sources**: decoded bundle at `/workspace/real-game-data/engine/<remote>/`
@@ -193,7 +193,7 @@ client's own geometry rules. Never hand-draw tiles, never invent palettes.
     center rule — they once disagreed by half a row because three places each had
     their own copy of the math.
 
-## 5. Web surface (every line the old board touched, the new one must too)
+## 5. Bề mặt web (sự kiện mới phải đi qua mọi lớp của bảng cũ)
 - Route `/ev` (page no-store) + `evAppURL` + dashboard button. `webtmpl/<page>.html`
   auto-registers as a page name (skip layout/login) — the handler is `webRender`.
 - **SSE reality**: `/events/mapsub?which=X&on=1` only REGISTERS interest — frames
@@ -224,7 +224,7 @@ client's own geometry rules. Never hand-draw tiles, never invent palettes.
 - Buttons obey the item ban; press-thru vs confirm per user directive (2026-10-07:
   tangtoc + anqua press straight; item-revive keeps its confirm).
 
-## 6. Tests you must have (green before any ship)
+## 6. Các bài test bắt buộc (phải xanh trước khi phát hành)
 - Grid/cities/anchor + click-solve roundtrip of every passable cell + stream frame
   + pixels-released-after-render assertion (OOM directive) — `internal/gimap`.
 - Wire: follow→EnterGame→Move (flag flipped mid-flight asserted), seat-exclusion
@@ -242,7 +242,7 @@ client's own geometry rules. Never hand-draw tiles, never invent palettes.
   `TYTD_LIVE=1 … go test -tags "sqlcipher live" -count=1 -run TestX -v .`
   Compile-check live files with `go vet -tags "sqlcipher live" .`
 
-## 7. Verify + ship (this exact idiom)
+## 7. Xác minh và phát hành
 ```bash
 export PATH="/root/.asdf/installs/golang/1.24.4/go/bin:$PATH"
 env -u GOROOT -u GOPATH -u GOBIN -u GOTOOLCHAIN go vet -tags sqlcipher .
@@ -266,7 +266,7 @@ env -u GOROOT -u GOPATH -u GOBIN -u GOTOOLCHAIN GOOS=linux GOARCH=amd64 \
 - Tell the user plainly what still needs their phone (canvas pixels, live orders)
   and check whether the event window is still open before proposing live tests.
 
-## 8. Known gotchas (all learned the hard way)
+## 8. Cạm bẫy đã biết
 - Shared-answer boards: seat-routing bugs are invisible locally, visible in-game.
 - PNG color-type-6 decodes to NRGBA — convert with draw.Src, never CatmullRom.
 - iOS blanks canvases silently over ~10.5Mpx — one fit function, every bake.

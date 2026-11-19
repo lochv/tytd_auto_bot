@@ -1,10 +1,10 @@
-# Big Chess — wire protocol & tool reference (activity type 341)
+# Big Chess — giao thức wire và tài liệu công cụ (activity type 341)
 
 Requests carry the FULL id; the client network layer writes ids ≥ 100000 as
 id % 100000 on the way back from the server. Success is always `ret == 0`.
 The bot (tytd) speaks this protocol for you and exposes only the tools below.
 
-## Ranked commands (what the MCP tools relay)
+## Lệnh xếp hạng (các lệnh được công cụ MCP chuyển tiếp)
 
 | full id | transport | tool | request | answer highlights |
 |---|---|---|---|---|
@@ -28,7 +28,7 @@ Practice shares the one `bigchess_state` slot with ranked: whichever mode you
 entered last owns the board. Death in practice just ends — there is no revive
 ladder to pay.
 
-## Board/state model (as `bigchess_state` returns it)
+## Mô hình bàn cờ/trạng thái (do `bigchess_state` trả về)
 
 - Coordinates zero-based; live dims `width`/`height` (config
   `BIGCHESS_BOARD_XY` as `W*H`, fallback `8*9`).
@@ -55,7 +55,7 @@ ladder to pay.
 - `activityWindow` reports the live activity's phase/times (the game itself
   refuses moves outside its daily window; the `ret` code will tell you).
 
-## Errors you will see from the tools
+## Các lỗi có thể thấy từ công cụ
 
 - `server rejected … (ret=N)` — the game server's own refusal (bad move,
   wrong phase, no free run, cooldown…). Observed live: `end` mid-run →
@@ -66,7 +66,7 @@ ladder to pay.
 - `server did not answer` / `connection dropped` — account transport
   problem, not a game decision; verify with `get_user_info`/fresh state.
 
-## External play engine (optional — admin `/bcengine`)
+## Engine chơi bên ngoài (tùy chọn — admin `/bcengine`)
 
 `bigchess_analyze` relays the current state to the external engine service
 (`remoteBigChess/engine_api`, POST `/v1/analyze`). Two format truths the bot
@@ -96,7 +96,7 @@ are never reported as rejections. Tool errors starting with
 `big-chess engine` mean disabled/unreachable — gameplay and the other tools
 are unaffected.
 
-## Supporting activity machinery (handled by the bot, FYI)
+## Cơ chế hỗ trợ sự kiện (bot tự xử lý)
 
 Activity discovery is by the live activity list: entries with `type == 341`
 (the type is NEVER used as an activityId). The bot resolves the active

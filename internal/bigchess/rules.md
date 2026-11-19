@@ -1,4 +1,4 @@
-# Big Chess (Tiên Dịch Bài Cục) — AI rules
+# Big Chess (Tiên Dịch Bài Cục) — quy tắc cho AI
 
 You control the single red piece (`chessId=1008`) on a grid (live size from
 the `width`/`height` fields of `bigchess_state`; client fallback `8*9`,
@@ -7,7 +7,7 @@ possible and maximize captured score. The server is authoritative for
 everything: legality, spawns, scoring, revival, settlement. Local reasoning
 here is prediction only — always trust the next server board.
 
-## Turn contract with the MCP tools
+## Quy ước mỗi lượt với công cụ MCP
 
 1. Call `bigchess_state` and remember `stateVersion`. If `hasSelf=false` or
    `settled=true`, start/resume with `bigchess_enter_game` first.
@@ -28,7 +28,7 @@ here is prediction only — always trust the next server board.
    actions from the same state.
 5. If `gameStatus==1` (dead, revival prompt), see "Death" below.
 
-## Your movement (rook-like)
+## Cách di chuyển của bạn (giống xe)
 
 From your cell you may travel orthogonally (up/down/left/right) through empty
 cells and may stop on any empty cell along the way; you may also stop ON the
@@ -36,7 +36,7 @@ first occupied cell in a direction, capturing that enemy piece. You may never
 pass beyond the first blocker, move diagonally, or stay in place — except
 with the pipe power (below).
 
-## Enemy threat geometry
+## Hình học vùng đe dọa của kẻ địch
 
 An enemy attacks a cell (e.g. your landing cell) as follows. "Line" means
 same row or same column; all blocking uses the CURRENT enemy board.
@@ -54,7 +54,7 @@ same row or same column; all blocking uses the CURRENT enemy board.
 When you capture a piece, that piece cannot threaten its own landing cell —
 evaluate threats AFTER your removals, on the post-move board.
 
-## The defender runs (live-verified, 2900+ transitions)
+## Quân phòng thủ sẽ chạy (đã xác minh thực tế)
 
 After your move resolves, exactly ONE enemy moves: with overwhelming priority
 (84% of turns) it is a piece your NEW position attacks, and it escapes by one
@@ -82,7 +82,7 @@ succeed; the rest are walled in). Consequences you must play with:
   turn's board (the external engine's search treats them as frozen — apply
   this rule around its advice).
 
-## Spawn waves (the main killer)
+## Các đợt sinh quân (mối nguy chính)
 
 The board is repopulated in waves. The state carries `nextTurn` (countdown)
 and `nextChess` — the NEXT wave's composition. When `nextTurn` is `1`, the
@@ -103,7 +103,7 @@ known composition in unknown positions:
 - Spawns take empty cells only; your own cell won't be overwritten, but a
   pawn spawning orthogonally adjacent to you kills you like any pawn.
 
-## Powers
+## Kỹ năng
 
 Three boolean flags ride on every `bigchess_move`; all three are always sent
 (false when unused). They are independent unless noted.
@@ -129,13 +129,13 @@ removed general again feeds a cross charge. It is not a move — call
 
 All `*Count` response fields are CONSUMED counters, not remaining counts.
 
-## Scoring
+## Tính điểm
 
 Each removed enemy contributes its `score` from `pieceScores` (live
 `ChessConfig` table; generals also grant a cross charge). `score` is int64 —
 do not round or re-derive it; the server's value replaces any local estimate.
 
-## Death and settlement
+## Chết và kết toán
 
 - `gameStatus==1`: you died. The server offers revival. `bigchess_revive`
   (type 0) accepts; the server picks the price from run state — item revive
@@ -150,7 +150,7 @@ do not round or re-derive it; the server's value replaces any local estimate.
 - `bigchess_enter_game` starts a new run while `freeCount > 0` (or costs an
   item, which the server refuses via `ret` when it can't pay).
 
-## The clock nobody shows you: the board only fills up
+## Chiếc đồng hồ không hiển thị: bàn cờ ngày càng chật
 
 Every wave ADDS pieces; nothing removes them except your captures and
 powers. Piece density therefore rises monotonically with `step`. The
@@ -183,7 +183,7 @@ size vs empty cells):
   crowd, a general is worth both its score and the charge it funds. A
   crowded board where you never spend powers is a lost board.
 
-## Thinking ahead (MANDATORY: roll 2–3 rounds, never decide on the static board)
+## Tính trước nhiều bước (BẮT BUỘC: mô phỏng 2–3 lượt)
 
 Every turn changes the board three ways: your move, the incoming wave, and
 an enemy step. Score each candidate destination by rolling it forward, not
@@ -215,7 +215,7 @@ by its immediate view:
   pieces adjacent on 3+ sides of you, that line is a cage no matter the
   captures: reach for the LATE-phase power plan one turn early.
 
-## Choosing a move (priority order)
+## Chọn nước đi (theo thứ tự ưu tiên)
 
 1. Land where no enemy attacks you on the post-move, post-wave board AND the
    rollout above leaves you ≥2 survivable ply-2 options. A landing with any
